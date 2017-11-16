@@ -6,6 +6,12 @@ def scala211 = "2.11.11"
 def dottyLatest = "0.2.0-RC1"
 scalaVersion in ThisBuild := scala211
 
+val useHydra = settingKey[Boolean]("Use the Triplequote Hydra Compiler")
+val hydraVersion = settingKey[String]("Hydra version")
+
+hydraVersion in ThisBuild := "0.9.8"
+useHydra in ThisBuild := true
+
 commands += Command.command("testAll") { s =>
   "test:compile" ::
     "compilation/test" ::
@@ -19,6 +25,15 @@ commands += Command.command("testAll") { s =>
 }
 
 resolvers += "scala-integration" at "https://scala-ci.typesafe.com/artifactory/scala-integration/"
+
+resolvers in ThisBuild ++= (if (useHydra.value) {
+  if (hydraVersion.value.endsWith("SNAPSHOT"))
+    List(
+      "Triplequote Hydra Repository" at "https://repo.triplequote.com/artifactory/libs-snapshot",
+      Resolver.mavenLocal)
+  else
+    List("Triplequote Hydra Repository" at "https://repo.triplequote.com/artifactory/libs-release")
+} else Nil)
 
 // Convenient access to builds from PR validation
 resolvers ++= (
@@ -52,11 +67,12 @@ lazy val compilation = addJmh(project).settings(
   description := "Black box benchmark of the compiler",
   libraryDependencies += {
     if (isDotty.value) "ch.epfl.lamp" %% "dotty-compiler" % scalaVersion.value
+    else if (useHydra.value) "com.triplequote" %% "hydra" % hydraVersion.value cross CrossVersion.full
     else scalaOrganization.value % "scala-compiler" % scalaVersion.value
   },
   crossScalaVersions := List(scala211, dottyLatest),
   unmanagedSourceDirectories.in(Compile) +=
-    sourceDirectory.in(Compile).value / (if (isDotty.value) "dotc" else "scalac"),
+    sourceDirectory.in(Compile).value / (if (isDotty.value) "dotc" else if (useHydra.value) "hydra" else "scalac"),
   mainClass in (Jmh, run) := Some("scala.bench.ScalacBenchmarkRunner"),
   libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
   testOptions in Test += Tests.Argument(TestFrameworks.JUnit),
