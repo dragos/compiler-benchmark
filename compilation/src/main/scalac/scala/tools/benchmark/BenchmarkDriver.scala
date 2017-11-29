@@ -41,8 +41,8 @@ trait BenchmarkDriver extends BaseBenchmarkDriver {
     override protected def processSettingsHook(): Boolean = {
       if (source == "scala")
         settings.sourcepath.value = Paths.get(s"../corpus/$source/$corpusVersion/library").toAbsolutePath.normalize.toString
-      else
-        settings.usejavacp.value = true
+      // else
+      //   settings.usejavacp.value = true
       settings.outdir.value = tempDir.getAbsolutePath
       settings.nowarn.value = true
       if (depsClasspath != null)
