@@ -32,8 +32,8 @@ resolvers in ThisBuild ++= (if (useHydra.value) {
       "Triplequote Hydra Repository" at "https://repo.triplequote.com/artifactory/libs-snapshot",
       Resolver.mavenLocal)
   else
-    List("Triplequote Hydra Repository" at "https://repo.triplequote.com/artifactory/libs-release")
-} else Nil)
+    List("Triplequote Hydra Repository" at "https://repo.triplequote.com/artifactory/libs-release", Resolver.mavenLocal)
+} else List(Resolver.mavenLocal))
 
 // Convenient access to builds from PR validation
 resolvers ++= (
@@ -42,7 +42,7 @@ resolvers ++= (
       "pr-scala snapshots" at "https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/",
       Resolver.mavenLocal)
   else
-    Nil
+    List(Resolver.mavenLocal)
 )
 
 lazy val infrastructure = addJmh(project).settings(
@@ -54,7 +54,7 @@ lazy val infrastructure = addJmh(project).settings(
     "org.eclipse.jgit" % "org.eclipse.jgit" % "4.6.0.201612231935-r",
     "com.google.guava" % "guava" % "21.0",
     "org.apache.commons" % "commons-lang3" % "3.5",
-    "com.typesafe" % "config" % "1.3.1",
+    "com.typesafe" % "config" % "1.3.2",
     "org.slf4j" % "slf4j-api" % "1.7.24",
     "org.slf4j" % "log4j-over-slf4j" % "1.7.24",  // for any java classes looking for this
     "ch.qos.logback" % "logback-classic" % "1.2.1"
